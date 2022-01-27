@@ -1,9 +1,9 @@
 # MRLA-Net
 Multi-head Recurrent Layer Attention for Vision Network
 
-![MRLA](figures/mrla.png=250x)
+![MRLA](figures/mrla.png =100x)
 
-![MRLA in CNNs](figures/rla_cnn.png=250x)
+![MRLA in CNNs](figures/rla_cnn.png =100x)
 
 
 ## Installation
