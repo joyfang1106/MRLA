@@ -8,6 +8,26 @@ Multi-head Recurrent Layer Attention for Vision Network
 
 ## Installation
 
+### Base environment for ImageNet Classification
+
+1. Create a conda virtual environment and activate it.
+    ```shell
+    conda create -n pytorch python=3.7 -y
+    conda activate pytorch
+    ```
+
+2. PyTorch versions 1.4, 1.5.x, 1.6, 1.7.x, and 1.8 are supported
+    ```shell
+    # CUDA 11.1
+    conda install pytorch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 cudatoolkit=11.1 -c pytorch -c conda-forge
+    
+    # CUDA 10.1
+    conda install pytorch==1.7.1 torchvision==0.8.2 torchaudio==0.7.2 cudatoolkit=10.1 -c pytorch
+
+    # CUDA 10.2
+    conda install pytorch==1.7.1 torchvision==0.8.2 torchaudio==0.7.2 cudatoolkit=10.2 -c pytorch
+    ```
+
 
 ## Quick Start
 
