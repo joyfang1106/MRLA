@@ -4,4 +4,4 @@ model = dict(
         # depth=101,
         layers=[3, 4, 23, 3], 
         init_cfg=dict(type='Pretrained',
-                      checkpoint='./pretrained/r101_rla_78.4.pth.tar')))
+                      checkpoint='./pretrained/r101_mrla_78.66.pth.tar')))
