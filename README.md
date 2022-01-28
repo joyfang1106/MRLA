@@ -43,8 +43,10 @@ Use multi-processing distributed training to launch N processes per node, which 
 
 #### - Specify single GPU or multiple GPUs
 
+For example, to train ResNet-50 with MRLA
+
   ```bash
-  CUDA_VISIBLE_DEVICES={device_ids} python train.py -a {model_name} --b {batch_size} --multiprocessing-distributed --world-size 1 --rank 0 {imagenet-folder with train and val folders}
+  CUDA_VISIBLE_DEVICES=0,1 python train.py '/imagenet' -a resnet50_mrla -b 256 --epochs 100 --warmup-epochs 3 --drop-path 0.2 --action dp20 --multiprocessing-distributed --dist-url 'tcp://127.0.0.1:12315' --world-size 1 --rank 0 --workers 10
   ```
 
 ### Testing
