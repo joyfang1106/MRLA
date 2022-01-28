@@ -28,6 +28,20 @@ Multi-head Recurrent Layer Attention for Vision Network
     conda install pytorch==1.7.1 torchvision==0.8.2 torchaudio==0.7.2 cudatoolkit=10.2 -c pytorch
     ```
 
+### timm
+
+
+### MMDetection
+
+
+### DeiT/CeiT
+
+Please follow their github to install PyTorch 1.7.0+ and torchvision 0.8.1+ and pytorch-image-models 0.3.2
+
+    ```shell
+    pip install timm==0.3.2
+    ```
+
 
 ## Quick Start
 
