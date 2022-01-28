@@ -37,16 +37,18 @@ Multi-head Recurrent Layer Attention for Vision Network
 
 Use multi-processing distributed training to launch N processes per node, which has N GPUs. This is the fastest way to use PyTorch for either single node or multi node data parallel training.
 
+For example, to train ResNet-50 with MRLA
+
   ```bash
-  python train.py -a {model_name} --b {batch_size} --multiprocessing-distributed --world-size 1 --rank 0 {imagenet-folder with train and val folders}
+  python train.py '/imagenet' -a resnet50_mrla -b 256 --epochs 100 --warmup-epochs 3 --drop-path 0.2 --action dp20 --multiprocessing-distributed --dist-url 'tcp://127.0.0.1:12300' --world-size 1 --rank 0 --workers 10
   ```
 
 #### - Specify single GPU or multiple GPUs
 
-For example, to train ResNet-50 with MRLA
+For example, to train ResNet-50 with MRLA using 2 GPUs
 
   ```bash
-  CUDA_VISIBLE_DEVICES=0,1 python train.py '/imagenet' -a resnet50_mrla -b 256 --epochs 100 --warmup-epochs 3 --drop-path 0.2 --action dp20 --multiprocessing-distributed --dist-url 'tcp://127.0.0.1:12315' --world-size 1 --rank 0 --workers 10
+  CUDA_VISIBLE_DEVICES=0,1 python train.py '/imagenet' -a resnet50_mrla -b 256 --epochs 100 --warmup-epochs 3 --drop-path 0.2 --action dp20 --multiprocessing-distributed --dist-url 'tcp://127.0.0.1:12300' --world-size 1 --rank 0 --workers 10
   ```
 
 ### Testing
