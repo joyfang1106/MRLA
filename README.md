@@ -61,15 +61,23 @@ We provide models and config files for MMDetection. Put the files into the same 
 
 Note that the config files of the latest version of MMDetection are a little different from previous one. Specifically, use 'init_cfg=' instead of 'pretrained=' to load the pretrained weights.
 
-To train a faster_rcnn with our MRLA on ResNet-50 using 2 GPUs (batch=16, samples_per_gpu=8)
+To train a faster_rcnn with our MRLA on ResNet-50 using 2 GPUs (batch=16, samples_per_gpu=8),
 
-    ```shell
-    CUDA_VISIBLE_DEVICES=0,1 python tools/train.py configs/faster_rcnn/faster_rcnn_r50la_fpn_1x_coco.py --cfg-options data.samples_per_gpu=8
-    ```
-
+  ```bash
+  CUDA_VISIBLE_DEVICES=0,1 python tools/train.py configs/faster_rcnn/faster_rcnn_r50la_fpn_1x_coco.py --cfg-options data.samples_per_gpu=8
+  ```
 
 ### Train with EfficientNet on ImageNet-1K
 
+Please install pytorch-image-models first.
+
+Put the files in timm folder into the same folder of pytorch-image-models
+
+To train a EfficientNet-B0 with our MRLA,
+
+  ```bash
+  CUDA_VISIBLE_DEVICES=0,1 python3 -m torch.distributed.launch --nproc_per_node=2 --master_port=12345 train.py '/home/r11user2/imagenet' --model efficientnet_mrla_b0 -b 384 --lr .048 --epochs 350 --sched step --decay-epochs 2.4 --decay-rate .97 --opt rmsproptf --opt-eps .001 -j 8 --warmup-lr 1e-6 --weight-decay 1e-5 --drop 0.2 --drop-path 0.2 --aa rand-m9-mstd0.5 --amp --remode pixel --reprob 0.2
+  ```
 
 
 ### Train with DeiT on ImageNet-1K
