@@ -57,11 +57,7 @@ To evaluate the best model
   
 ### MMDetection
 
-We provide models and config files for MMDetection:
-
-- resnet_mrla.py in './mmdetection/mmdet/models/backbones/', and import the model in the __init__.py file.
-- base config files in './mmdetection/configs/_base_/models/'
-- config files in the folders named by the corresponding folders
+We provide models and config files for MMDetection. Put the files into the same folder as in this repository, e.g., put 'resnet_la.py' in './mmdetection/mmdet/models/backbones/', and import the model in the __init__.py file.
 
 Note that the config files of the latest version of MMDetection are a little different from previous one. Specifically, use 'init_cfg=' instead of 'pretrained=' to load the pretrained weights.
 
