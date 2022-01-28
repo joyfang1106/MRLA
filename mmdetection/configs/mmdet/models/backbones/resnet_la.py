@@ -34,11 +34,11 @@ class mrla_module(BaseModule):
     
     def __init__(self, input_dim):
         super(mrla_module, self).__init__()
-        self.la = mla_layer(input_dim=input_dim, dim_pergroup=self.dim_pergroup)
+        self.mla = mla_layer(input_dim=input_dim, dim_pergroup=self.dim_pergroup)
         self.lambda_t = nn.Parameter(torch.randn(input_dim, 1, 1))  # nn.Parameter(torch.zeros(1, 1, embed_dim))
         
     def forward(self, xt, ot_1):
-        atten_t = self.la(xt)
+        atten_t = self.mla(xt)
         out = atten_t + self.lambda_t.expand_as(ot_1) * ot_1 # o_t = atten(x_t) + lambda_t * o_{t-1}
         return out
 
