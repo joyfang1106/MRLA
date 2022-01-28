@@ -21,12 +21,7 @@ from datasets import build_dataset
 from engine import train_one_epoch, evaluate
 from samplers import RASampler
 import ceit_model
-import ceit_rlav2
-import ceit_rlav3
-# import ceit_rlav4
-# import ceit_rlav5
-# import ceit_rlav6
-import ceit_rlav7
+import ceit_mrla
 
 # import models
 import utils
