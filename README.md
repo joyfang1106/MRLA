@@ -63,7 +63,7 @@ We provide models and config files for MMDetection:
 - base config files in './mmdetection/configs/_base_/models/'
 - config files in the folders named by the corresponding folders
 
-Note that the config files of the latest version of MMDetection are a little different from previous one. Specifically, 
+Note that the config files of the latest version of MMDetection are a little different from previous one. Specifically, use 'init_cfg=' instead of 'pretrained=' to load the pretrained weights.
 
 
 ### Train with EfficientNet on ImageNet-1K
