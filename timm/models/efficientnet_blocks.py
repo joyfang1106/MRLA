@@ -341,11 +341,11 @@ class crla_module(nn.Module):
     
     def __init__(self, input_dim):
         super(crla_module, self).__init__()
-        self.la = cla_layer(input_dim=input_dim)
+        self.cla = cla_layer(input_dim=input_dim)
         self.lambda_t = nn.Parameter(torch.randn(input_dim, 1, 1))  # nn.Parameter(torch.zeros(1, 1, embed_dim))
         
     def forward(self, xt, ot_1):
-        atten_t = self.la(xt)
+        atten_t = self.cla(xt)
         out = atten_t + self.lambda_t.expand_as(ot_1) * ot_1 # o_t = atten(x_t) + lambda_t * o_{t-1}
         return out  
     
@@ -353,11 +353,11 @@ class mrla_module(nn.Module):
     
     def __init__(self, input_dim, g_gla=8):
         super(mrla_module, self).__init__()
-        self.la = mla_layer(input_dim=input_dim, groups=g_gla)
+        self.mla = mla_layer(input_dim=input_dim, groups=g_gla)
         self.lambda_t = nn.Parameter(torch.randn(input_dim, 1, 1))  # nn.Parameter(torch.zeros(1, 1, embed_dim))
         
     def forward(self, xt, ot_1):
-        atten_t = self.la(xt)
+        atten_t = self.mla(xt)
         out = atten_t + self.lambda_t.expand_as(ot_1) * ot_1 # o_t = atten(x_t) + lambda_t * o_{t-1}
         return out 
     
