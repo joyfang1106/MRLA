@@ -100,6 +100,16 @@ To train a EfficientNet-B0 with our MRLA using 2 GPUs,
 
 ### Train with DeiT on ImageNet-1K
 
+To train DeiT-T with MRLA, batch size of 4x256 on 4 GPUs
 
+  ```bash
+  python -m torch.distributed.launch --nproc_per_node=4 --use_env main.py --model deit_mrla_tiny_patch16_224 --batch-size 256 --data-path '/imagenet' 
+  ``` 
 
 ### Train with CeiT on ImageNet-1K
+
+To train CeiT-T with MRLA, batch size of 4x256 on 4 GPUs
+
+  ```bash
+  python -m torch.distributed.launch --nproc_per_node=4 --use_env main.py --model ceit_mrla_tiny_patch16_224 --batch-size 256 --data-path '/imagenet' --output_dir work_dirs
+  ``` 
