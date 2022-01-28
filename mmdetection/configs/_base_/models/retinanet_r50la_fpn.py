@@ -11,7 +11,7 @@ model = dict(
         # norm_cfg=dict(type='BN', requires_grad=True),
         norm_eval=True,
         style='pytorch',
-        init_cfg=dict(type='Pretrained', checkpoint='./pretrained/r50_rla_77.55.pth.tar')),
+        init_cfg=dict(type='Pretrained', checkpoint='./pretrained/r50_mrla_77.65.pth.tar')),
     neck=dict(
         type='FPN',
         in_channels=[256, 512, 1024, 2048],
