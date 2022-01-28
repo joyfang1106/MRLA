@@ -62,6 +62,7 @@ We provide models and config files for MMDetection. Put the files into the same 
 Note that the config files of the latest version of MMDetection are a little different from previous one. Specifically, use 'init_cfg=' instead of 'pretrained=' to load the pretrained weights.
 
 To train a faster_rcnn with our MRLA on ResNet-50 using 2 GPUs (batch=16, samples_per_gpu=8)
+
     ```bash
     CUDA_VISIBLE_DEVICES=0,1 python tools/train.py configs/faster_rcnn/faster_rcnn_r50la_fpn_1x_coco.py --cfg-options data.samples_per_gpu=8
     ```
