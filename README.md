@@ -87,7 +87,7 @@ To train a faster_rcnn with our MRLA on ResNet-50 using 2 GPUs (batch=16, sample
 
 ### Train with EfficientNet on ImageNet-1K
 
-Please install pytorch-image-models first.
+Please install pytorch-image-models (timm) first. There would be some differences between different verions of timm. My version is timm==0.4.9
 
 Put the files in timm folder into the same folder of pytorch-image-models
 
