@@ -73,7 +73,7 @@ Please install pytorch-image-models first.
 
 Put the files in timm folder into the same folder of pytorch-image-models
 
-To train a EfficientNet-B0 with our MRLA on 2 GPUs,
+To train a EfficientNet-B0 with our MRLA using 2 GPUs,
 
   ```bash
   CUDA_VISIBLE_DEVICES=0,1 python3 -m torch.distributed.launch --nproc_per_node=2 --master_port=12345 train.py '/home/r11user2/imagenet' --model efficientnet_mrla_b0 -b 384 --lr .048 --epochs 350 --sched step --decay-epochs 2.4 --decay-rate .97 --opt rmsproptf --opt-eps .001 -j 8 --warmup-lr 1e-6 --weight-decay 1e-5 --drop 0.2 --drop-path 0.2 --aa rand-m9-mstd0.5 --amp --remode pixel --reprob 0.2
