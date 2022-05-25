@@ -1,5 +1,5 @@
-# MRLA-Net
-Multi-head Recurrent Layer Attention for Vision Network
+# MRLA
+MRLA: Layer Attention with Linear Complexity for Vision Networks
 
 ![MRLA](figures/latnet-MRLA.png)
 
