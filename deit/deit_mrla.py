@@ -29,6 +29,13 @@ from math import log
 # from timm.models.helpers import build_model_with_cfg, named_apply, adapt_input_conv
 from helpers import named_apply
 
+from thop import profile
+
+
+'''
+Wv: conv2d-gelu
+'''
+
 
 __all__ = [
     'deit_mrla_tiny_patch16_224', 'deit_mrla_small_patch16_224', 'deit_mrla_base_patch16_224',
@@ -157,11 +164,11 @@ class Attention(nn.Module):
     
 class mla_layer(nn.Module):
     """
-    when groups = channels, channelwise (Q(K)' is then pointwise(channelwise) multiplication)
+    when heads = channels, channelwise (Q(K)' is then pointwise(channelwise) multiplication)
     
     Args:
         input_dim: input channel c (output channel is the same)
-        k_size: channel dimension of Q, K
+        k_size: kernel size of conv1d
         input : [b, c, h, w]
         output: [b, c, h, w]
         
@@ -171,17 +178,17 @@ class mla_layer(nn.Module):
         K: [b, 1, c]
         V: [b, c, h, w]
     """
-    def __init__(self, input_dim, groups=None, dim_pergroup=None, k_size=None):
+    def __init__(self, input_dim, heads=None, dim_perhead=None, k_size=None):
         super(mla_layer, self).__init__()
         self.input_dim = input_dim
         self.k_size = k_size
-        if (groups == None) and (dim_pergroup == None):
-            raise ValueError("arguments groups and dim_pergroup cannot be None at the same time !")
-        elif dim_pergroup != None:
-            groups = int(input_dim / dim_pergroup)
+        if (heads == None) and (dim_perhead == None):
+            raise ValueError("arguments heads and dim_perhead cannot be None at the same time !")
+        elif dim_perhead != None:
+            heads = int(input_dim / dim_perhead)
         else:
-            groups = groups
-        self.groups = groups
+            heads = heads
+        self.heads = heads
         
         if k_size == None:
             t = int(abs((log(input_dim, 2) + 1) / 2.))
@@ -191,9 +198,9 @@ class mla_layer(nn.Module):
         self.Wq = nn.Conv1d(1, 1, kernel_size=k_size, padding=(k_size - 1) // 2, bias=False)
         self.Wk = nn.Conv1d(1, 1, kernel_size=k_size, padding=(k_size - 1) // 2, bias=False)
         self.Wv = nn.Conv2d(input_dim, input_dim, kernel_size=3, stride=1, padding=1, groups=input_dim, bias=False) 
-        self.bn_v = nn.BatchNorm2d(input_dim)
+        # self.bn_v = nn.BatchNorm2d(input_dim)
         self.act_v = nn.GELU()
-        self._norm_fact = 1 / sqrt(input_dim / groups)
+        self._norm_fact = 1 / sqrt(input_dim / heads)
         # nn.ReLU(inplace=True)
         # self.depthwise1 = nn.Conv2d(channel, channel, kernel_size=1, groups=channel, bias=False) 
         self.sigmoid = nn.Sigmoid()
@@ -208,19 +215,19 @@ class mla_layer(nn.Module):
         Q = self.Wq(y) # Q: [b, 1, c] 
         K = self.Wk(y) # K: [b, 1, c]
         V = self.Wv(x) # V: [b, c, h, w]
-        V = self.act_v(self.bn_v(V))
-        # Q = Q.chunk(self.groups, dim = -1) # a tuple of g * [b, 1, c/g]
-        # K = K.chunk(self.groups, dim = -1)
-        # V = V.chunk(self.groups, dim = 1) # a tuple of g * [b, c/g, h, w]
-        Q = Q.view(b, self.groups, 1, int(c/self.groups)) # [b, g, 1, c/g]
-        K = K.view(b, self.groups, 1, int(c/self.groups)) # [b, g, 1, c/g]
-        V = V.view(b, self.groups, int(c/self.groups), h, w) # [b, g, c/g, h, w]
+        V = self.act_v(V)
+        # Q = Q.chunk(self.heads, dim = -1) # a tuple of g * [b, 1, c/g]
+        # K = K.chunk(self.heads, dim = -1)
+        # V = V.chunk(self.heads, dim = 1) # a tuple of g * [b, c/g, h, w]
+        Q = Q.view(b, self.heads, 1, int(c/self.heads)) # [b, g, 1, c/g]
+        K = K.view(b, self.heads, 1, int(c/self.heads)) # [b, g, 1, c/g]
+        V = V.view(b, self.heads, int(c/self.heads), h, w) # [b, g, c/g, h, w]
         # Q.is_contiguous()
         
         atten = torch.einsum('... i d, ... j d -> ... i j', Q, K) * self._norm_fact
         # atten.size() # [b, g, 1, 1]
     
-        atten = self.sigmoid(atten.view(b, self.groups, 1, 1, 1)) # [b, g, 1, 1, 1]
+        atten = self.sigmoid(atten.view(b, self.heads, 1, 1, 1)) # [b, g, 1, 1, 1]
         output = V * atten.expand_as(V) # [b, g, c/g, h, w]
         output = output.view(b, c, h, w)
         
@@ -229,17 +236,25 @@ class mla_layer(nn.Module):
     
 class mrla_module(nn.Module):
     
-    def __init__(self, input_dim, dim_pergroup):
+    def __init__(self, input_dim, dim_perhead, norm_layer=partial(nn.LayerNorm, eps=1e-6)):
         super(mrla_module, self).__init__()
-        self.dim_pergroup = dim_pergroup
-        self.mla = mla_layer(input_dim=input_dim, dim_pergroup=self.dim_pergroup)
+        self.dim_perhead = dim_perhead
+        self.mla = mla_layer(input_dim=input_dim, dim_perhead=self.dim_perhead)
         # self.bn_rla = nn.BatchNorm2d(input_dim)
         # self.drop_path_rla = DropPath(drop_path_rla) if drop_path_rla > 0. else nn.Identity()
         self.lambda_t = nn.Parameter(torch.randn(input_dim))  # nn.Parameter(torch.zeros(1, 1, embed_dim))
         
+        # NOTE add LN on the input xt and ot_1
+        self.normx = norm_layer(input_dim)
+        self.normo = norm_layer(input_dim)
+        
     def forward(self, xt, ot_1):
+        xt = self.normx(xt)
+        ot_1 = self.normo(ot_1)
+        
         b, n, k = xt.size()
         cls_token, tokens = torch.split(xt, [1, n - 1], dim=1)
+        # h, w = int(math.sqrt(n - 1)), int(math.sqrt(n - 1))
         xt = tokens.reshape(b, int(math.sqrt(n - 1)), int(math.sqrt(n - 1)), k).permute(0, 3, 1, 2)
         
         xt = self.mla(xt)
@@ -253,9 +268,9 @@ class mrla_module(nn.Module):
 
 class Block(nn.Module):
 
-    def __init__(self, dim, num_heads, dim_grla, 
+    def __init__(self, dim, num_heads, dim_mrla, 
                  mlp_ratio=4., qkv_bias=False, drop=0., attn_drop=0.,
-                 drop_path=0., act_layer=nn.GELU, norm_layer=nn.LayerNorm):
+                 drop_path=0., act_layer=nn.GELU, norm_layer=partial(nn.LayerNorm, eps=1e-6)):
         super().__init__()
         self.norm1 = norm_layer(dim)
         self.attn = Attention(dim, num_heads=num_heads, qkv_bias=qkv_bias, attn_drop=attn_drop, proj_drop=drop)
@@ -265,22 +280,23 @@ class Block(nn.Module):
         mlp_hidden_dim = int(dim * mlp_ratio)
         self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
         
-        self.mrla = mrla_module(input_dim=dim, dim_pergroup=dim_grla)
-        self.norm_mrla = norm_layer(dim)
-        # self.norm_rla2 = norm_layer(dim)
+        self.mrla = mrla_module(input_dim=dim, dim_perhead=dim_mrla)
+        # self.norm_mrla = norm_layer(dim)
 
     def forward(self, x):
-        x = self.norm1(x)
         ot = x
-        x = x + self.drop_path(self.attn(x))
+        
+        x = x + self.drop_path(self.attn(self.norm1(x)))
         x = x + self.drop_path(self.mlp(self.norm2(x)))
         
         # layer attention
-        x = x + self.drop_path(self.mrla(self.norm_mrla(x), ot))
+        # NOTE here x and ot should be both normed or not, better in mrla module
+        # x = x + self.drop_path(self.mrla(x, ot)) 
+        x = x + self.mrla(x, ot)
         return x
 
 
-class ViT_MRLA(nn.Module):
+class ViT_mrla(nn.Module):
     """ Vision Transformer
     A PyTorch impl of : `An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale`
         - https://arxiv.org/abs/2010.11929
@@ -288,10 +304,13 @@ class ViT_MRLA(nn.Module):
         - https://arxiv.org/abs/2012.12877
     """
 
-    def __init__(self, img_size=224, patch_size=16, in_chans=3, num_classes=1000, embed_dim=768, depth=12,
-                 num_heads=12, dim_grla=16, 
-                 mlp_ratio=4., qkv_bias=True, representation_size=None, distilled=False,
-                 drop_rate=0., attn_drop_rate=0., drop_path_rate=0., embed_layer=PatchEmbed, norm_layer=None,
+    def __init__(self, img_size=224, patch_size=16, in_chans=3, num_classes=1000, 
+                 embed_dim=768, depth=12,
+                 num_heads=12, dim_mrla=16, 
+                 mlp_ratio=4., qkv_bias=True, 
+                 representation_size=None, distilled=False,
+                 drop_rate=0., attn_drop_rate=0., drop_path_rate=0., 
+                 embed_layer=PatchEmbed, norm_layer=None,
                  act_layer=nn.GELU, weight_init=''):
         """
         Args:
@@ -332,7 +351,7 @@ class ViT_MRLA(nn.Module):
         dpr = [x.item() for x in torch.linspace(0, drop_path_rate, depth)]  # stochastic depth decay rule
         self.blocks = nn.Sequential(*[
             Block(
-                dim=embed_dim, num_heads=num_heads, dim_grla=dim_grla, 
+                dim=embed_dim, num_heads=num_heads, dim_mrla=dim_mrla, 
                 mlp_ratio=mlp_ratio, qkv_bias=qkv_bias, drop=drop_rate,
                 attn_drop=attn_drop_rate, drop_path=dpr[i], norm_layer=norm_layer, act_layer=act_layer)
             for i in range(depth)])
@@ -460,8 +479,8 @@ def _init_vit_weights(module: nn.Module, name: str = '', head_bias: float = 0., 
 
 @register_model
 def deit_mrla_tiny_patch16_224(pretrained=False, **kwargs):
-    model = ViT_MRLA(
-        patch_size=16, embed_dim=192, depth=12, num_heads=3, dim_grla=16, 
+    model = ViT_mrla(
+        patch_size=16, embed_dim=192, depth=12, num_heads=3, dim_mrla=16, 
         mlp_ratio=4, qkv_bias=True,
         norm_layer=partial(nn.LayerNorm, eps=1e-6), **kwargs)
     model.default_cfg = _cfg()
@@ -476,8 +495,8 @@ def deit_mrla_tiny_patch16_224(pretrained=False, **kwargs):
 
 @register_model
 def deit_mrla_small_patch16_224(pretrained=False, **kwargs):
-    model = ViT_MRLA(
-        patch_size=16, embed_dim=384, depth=12, num_heads=6, dim_grla=16, 
+    model = ViT_mrla(
+        patch_size=16, embed_dim=384, depth=12, num_heads=6, dim_mrla=16, 
         mlp_ratio=4, qkv_bias=True,
         norm_layer=partial(nn.LayerNorm, eps=1e-6), **kwargs)
     model.default_cfg = _cfg()
@@ -492,8 +511,8 @@ def deit_mrla_small_patch16_224(pretrained=False, **kwargs):
 
 @register_model
 def deit_mrla_base_patch16_224(pretrained=False, **kwargs):
-    model = ViT_MRLA(
-        patch_size=16, embed_dim=768, depth=12, num_heads=12, dim_grla=16, 
+    model = ViT_mrla(
+        patch_size=16, embed_dim=768, depth=12, num_heads=12, dim_mrla=16, 
         mlp_ratio=4, qkv_bias=True,
         norm_layer=partial(nn.LayerNorm, eps=1e-6), **kwargs)
     model.default_cfg = _cfg()
@@ -505,3 +524,42 @@ def deit_mrla_base_patch16_224(pretrained=False, **kwargs):
     #     model.load_state_dict(checkpoint["model"])
     return model
 
+
+
+def clever_format(nums, format="%.2f"):
+    clever_nums = []
+
+    for num in nums:
+        if num > 1e12:
+            clever_nums.append(format % (num / 1024 ** 4) + "T")
+        elif num > 1e9:
+            clever_nums.append(format % (num / 1024 ** 3) + "G")
+        elif num > 1e6:
+            clever_nums.append(format % (num / 1024 ** 2) + "M")
+        elif num > 1e3:
+            clever_nums.append(format % (num / 1024) + "K")
+        else:
+            clever_nums.append(format % num + "B")
+
+    clever_nums = clever_nums[0] if len(clever_nums) == 1 else (*clever_nums, )
+
+    return clever_nums
+
+def main(model_func):
+    model = model_func
+    # print(model)
+    input = torch.randn(1, 3, 224, 224)
+    model.train()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
+    input = input.to(device)
+    # model.eval()
+    flops, params = profile(model, inputs=(input, ))
+    print("flops = ", flops)
+    print("params = ", params)
+    flops, params = clever_format([flops, params], "%.3f")
+    print("flops = ", flops)
+    print("params = ", params)
+    
+if __name__ == '__main__':
+    main(deit_mrla_small_patch16_224())
