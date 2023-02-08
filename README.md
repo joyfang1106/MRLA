@@ -1,5 +1,6 @@
+# The code is being prepared (cleaned) and to be released soon.
 # MRLA
-MRLA: Layer Attention with Linear Complexity for Vision Networks
+Cross-Layer Retrospective Retrieving via Layer Attention
 
 ![MRLA](figures/xxx.png)
 
