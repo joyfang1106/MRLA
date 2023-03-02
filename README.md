@@ -7,7 +7,7 @@ Title: Cross-Layer Retrospective Retrieving via Layer Attention (Accepted by ICL
 <div>
     <center>
     <img src="figures/MRLA_eq6_ver2.png" width="600" alt="MRLA-base"/><br/>
-    MRLA-base 
+    <center><p>MRLA-base Module</p></center> 
     </center>
 </div>
     
