@@ -1,10 +1,14 @@
 
 # MRLA
-Cross-Layer Retrospective Retrieving via Layer Attention (Accepted by ICLR-2023)
 
-![MRLA-base](figures/MRLA_eq6_ver2.png)
+Title: Cross-Layer Retrospective Retrieving via Layer Attention (Accepted by ICLR-2023, [paper](http://arxiv.org/abs/2302.03985))
 
-![MRLA-light](figures/MRLA_eq8.png)
+
+
+<img src="figures/MRLA_eq6_ver2.png" width="600" alt="MRLA-base"/><br/>
+
+<img src="figures/MRLA_eq8.png" width="600" alt="MRLA-light"/><br/>
+
 
 ## Installation
 
@@ -106,10 +110,3 @@ To train DeiT-T with MRLA, batch size of 4x256 on 4 GPUs
   python -m torch.distributed.launch --nproc_per_node=4 --use_env main.py --model deit_mrla_tiny_patch16_224 --batch-size 256 --data-path '/imagenet' 
   ``` 
 
-### Train with CeiT on ImageNet-1K
-
-To train CeiT-T with MRLA, batch size of 4x256 on 4 GPUs
-
-  ```bash
-  python -m torch.distributed.launch --nproc_per_node=4 --use_env main.py --model ceit_mrla_tiny_patch16_224 --batch-size 256 --data-path '/imagenet' --output_dir work_dirs
-  ``` 
