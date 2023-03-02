@@ -4,8 +4,13 @@
 Title: Cross-Layer Retrospective Retrieving via Layer Attention (Accepted by ICLR-2023, [paper](http://arxiv.org/abs/2302.03985))
 
 
-
-<img src="figures/MRLA_eq6_ver2.png" width="600" alt="MRLA-base"/><br/>
+<div>
+    <center>
+    <img src="figures/MRLA_eq6_ver2.png" width="600" alt="MRLA-base"/><br/>
+    MRLA-base 
+    </center>
+</div>
+    
 
 <img src="figures/MRLA_eq8.png" width="600" alt="MRLA-light"/><br/>
 
