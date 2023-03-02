@@ -1,9 +1,10 @@
-# The code is being prepared (cleaned) and to be released soon.
+
 # MRLA
-Cross-Layer Retrospective Retrieving via Layer Attention
+Cross-Layer Retrospective Retrieving via Layer Attention (Accepted by ICLR-2023)
 
-![MRLA](figures/xxx.png)
+![MRLA-base](figures/MRLA_eq6_ver2.png)
 
+![MRLA-light](figures/MRLA_eq8.png)
 
 ## Installation
 
