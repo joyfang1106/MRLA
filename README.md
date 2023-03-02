@@ -1,17 +1,17 @@
 
 # MRLA
 
-Title: Cross-Layer Retrospective Retrieving via Layer Attention (Accepted by ICLR-2023, [paper](http://arxiv.org/abs/2302.03985))
+Title: Cross-Layer Retrospective Retrieving via Layer Attention (accepted by ICLR-2023, [paper](http://arxiv.org/abs/2302.03985))
 
 
+MRLA-base Module:
 <div>
     <center>
     <img src="figures/MRLA_eq6_ver2.png" width="600" alt="MRLA-base"/><br/>
-    <center><p>MRLA-base Module</p></center> 
     </center>
 </div>
     
-
+MRLA-light Module:
 <img src="figures/MRLA_eq8.png" width="600" alt="MRLA-light"/><br/>
 
 
