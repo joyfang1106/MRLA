@@ -1,5 +1,5 @@
 
-# MRLA
+# MRLA-Net
 
 Title: Cross-Layer Retrospective Retrieving via Layer Attention (accepted by ICLR-2023, [paper](http://arxiv.org/abs/2302.03985))
 
