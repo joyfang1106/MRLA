@@ -5,13 +5,12 @@ Title: Cross-Layer Retrospective Retrieving via Layer Attention (accepted by ICL
 
 
 MRLA-base Module:
-<div>
-    <center>
-    <img src="figures/MRLA_eq6_ver2.png" width="600" alt="MRLA-base"/><br/>
-    </center>
-</div>
+
+<img src="figures/MRLA_eq6_ver2.png" width="600" alt="MRLA-base"/><br/>
+
     
 MRLA-light Module:
+
 <img src="figures/MRLA_eq8.png" width="600" alt="MRLA-light"/><br/>
 
 
